@@ -1,9 +1,10 @@
+import 'express-async-errors';
 import * as dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
 const app = express();
 import morgan from 'morgan'; // HTTP request logger middleware for node.js
-
+import mongoose from 'mongoose';
 // routers
 import jobRouter from './routers/jobRouter.js';
 
@@ -37,7 +38,13 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 5100; // if it exists, use the port from the environment variable, otherwise use 5100
 
-app.listen(5100, () => {
-  // server will run on port 5100
-  console.log(`Server is running on PORT ${port}...`); // message to confirm the server is running
-});
+try {
+  await mongoose.connect(process.env.MONGO_URL);
+  app.listen(port, () => {
+    // server will run on port 5100
+    console.log(`Server is running on PORT ${port}...`); // message to confirm the server is running
+  });
+} catch (error) {
+  console.log(error);
+  process.exit(1); // exit the process with a failure code
+}
